@@ -2,13 +2,11 @@ package com.devsuperior.dslist.controllers;
 
 import com.devsuperior.dslist.dto.GameListDTO;
 import com.devsuperior.dslist.dto.GameMinDTO;
+import com.devsuperior.dslist.dto.ReplacementDTO;
 import com.devsuperior.dslist.services.GameListService;
 import com.devsuperior.dslist.services.GameService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -31,5 +29,28 @@ public class GameListController {
     public List<GameMinDTO> findByList(@PathVariable Long listId) {
         List<GameMinDTO> result = gameService.findByList(listId);
         return result;
+    }
+
+    //put (idempotente) - cada vez que salva, salva a mesma coisa
+    //post (não é idempotente) - cada vez que salva, salva uma coisa diferente, ex: inserir, reordenar
+    //usar substantivo no endpoind, verbo é o put, post, get, delete
+
+    //exemplo de consulta:
+    /*
+    SELECT
+    TB_BELONGING.*,
+    tb_game.title
+            FROM
+    tb_belonging
+    INNER JOIN TB_GAME ON TB_GAME.ID = TB_BELONGING.GAME_ID
+            WHERE
+    list_id = 2
+    ORDER BY
+    position
+    */
+
+    @PostMapping(value = "/{listId}/replacement")
+    public void move(@PathVariable Long listId, @RequestBody ReplacementDTO body) {
+        gameListService.move(listId, body.getSourceIndex(),body.getDestinationIndex());
     }
 }
